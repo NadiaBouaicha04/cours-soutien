@@ -1,0 +1,111 @@
+// =====================================================
+// Projet : Inscription à des cours de soutien
+// Modèle de données (DBML) - version finale étape 2
+// Visualisable sur https://dbdiagram.io
+// =====================================================
+
+Project cours_soutien {
+  database_type: 'PostgreSQL'
+  Note: 'Le solde restant d un parent n est pas stocké : il est calculé (somme des tarifs des niveaux des enfants inscrits - somme des mouvements).'
+}
+
+// ---------- Enums ----------
+// Côté Java : @Enumerated(EnumType.STRING), stockés en varchar
+
+Enum role {
+  PARENT
+  GESTIONNAIRE
+}
+
+Enum mode_paiement {
+  CHEQUE
+  ESPECES
+  VIREMENT
+}
+
+Enum jour {
+  LUNDI
+  MARDI
+  MERCREDI
+  JEUDI
+  VENDREDI
+  SAMEDI
+  DIMANCHE
+}
+
+// ---------- Tables ----------
+
+Table utilisateur {
+  id                bigint        [pk, increment]
+  nom               varchar(50)   [not null]
+  prenom            varchar(50)   [not null]
+  email             varchar(150)  [not null, unique, note: 'identifiant de connexion']
+  mot_de_passe      varchar(255)  [not null, note: 'hash BCrypt, jamais en clair']
+  role              role          [not null]
+  mode_paiement     mode_paiement [note: 'null pour un gestionnaire']
+  nombre_paiements  int           [note: '1 (comptant) à 6, null pour un gestionnaire']
+}
+
+Table niveau {
+  id       bigint        [pk, increment]
+  libelle  varchar(20)   [not null, unique, note: '6e ... Terminale']
+  ordre    int           [not null, unique, note: '1 = 6e ... 7 = Terminale (tri)']
+  montant  numeric(8,2)  [not null, note: 'tarif annuel du niveau, > 0']
+}
+
+Table salle {
+  id        bigint       [pk, increment]
+  nom       varchar(50)  [not null, unique]
+  capacite  int          [not null, note: '> 0']
+}
+
+Table cours {
+  id           bigint  [pk, increment]
+  jour         jour    [not null]
+  heure_debut  time    [not null]
+  heure_fin    time    [not null, note: '> heure_debut']
+  niveau_id    bigint  [not null]
+  salle_id     bigint  [not null]
+
+  indexes {
+    (salle_id, jour, heure_debut) [unique, name: 'uk_cours_salle_creneau', note: 'règle métier : une salle, un créneau, un seul cours']
+  }
+}
+
+Table enfant {
+  id              bigint        [pk, increment]
+  nom             varchar(50)   [not null]
+  prenom          varchar(50)   [not null]
+  date_naissance  date          [not null]
+  etablissement   varchar(100)
+  parent_id       bigint        [not null]
+  niveau_id       bigint        [not null]
+  cours_id        bigint        [note: 'null tant que non inscrit']
+
+  indexes {
+    (parent_id, nom, prenom, date_naissance) [unique, name: 'uk_enfant_parent_identite', note: 'règle métier : un parent ne peut pas enregistrer deux fois le même enfant']
+    parent_id [name: 'idx_enfant_parent', note: 'optimisation : tableau de bord du parent']
+    cours_id  [name: 'idx_enfant_cours', note: 'optimisation : places restantes + récap des inscrits']
+  }
+}
+
+Table mouvement {
+  id              bigint        [pk, increment]
+  date_mouvement  date          [not null]
+  montant         numeric(8,2)  [not null, note: '> 0']
+  libelle         varchar(100)  [note: 'ex : Chèque n°1234']
+  utilisateur_id  bigint        [not null]
+
+  indexes {
+    utilisateur_id [name: 'idx_mouvement_utilisateur', note: 'optimisation : historique des paiements']
+  }
+}
+
+// ---------- Relations ----------
+
+Ref fk_cours_niveau: cours.niveau_id > niveau.id                    // restrict (défaut)
+Ref fk_cours_salle: cours.salle_id > salle.id                       // restrict (défaut)
+Ref fk_enfant_parent: enfant.parent_id > utilisateur.id [delete: cascade]
+Ref fk_enfant_niveau: enfant.niveau_id > niveau.id                  // restrict (défaut)
+Ref fk_enfant_cours: enfant.cours_id > cours.id [delete: set null]
+Ref fk_mouvement_utilisateur: mouvement.utilisateur_id > utilisateur.id  // restrict : garder la trace des paiements
