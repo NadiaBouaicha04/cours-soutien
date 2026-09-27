@@ -18,10 +18,7 @@ import java.time.LocalDate;
         name = "uk_enfant_parent_identite",
         columnNames = {"parent_id", "nom", "prenom", "date_naissance"}
     ),
-    indexes = {
-        @Index(name = "idx_enfant_parent", columnList = "parent_id"),
-        @Index(name = "idx_enfant_cours", columnList = "cours_id")
-    }
+    indexes = @Index(name = "idx_enfant_parent", columnList = "parent_id")
 )
 @Getter
 @Setter
