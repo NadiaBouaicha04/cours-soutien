@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.time.LocalDate;
 
@@ -52,9 +54,12 @@ public class Enfant {
     @JoinColumn(name = "niveau_id", nullable = false)
     private Niveau niveau;
 
-    // null tant que non inscrit ; supprimer le cours désinscrit l'enfant
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cours_id")
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    private Cours cours;
+        @ManyToMany
+    @JoinTable(
+        name = "enfant_cours",
+        joinColumns = @JoinColumn(name = "enfant_id"),
+        inverseJoinColumns = @JoinColumn(name = "cours_id")
+    )
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<Cours> cours = new HashSet<>();
 }
