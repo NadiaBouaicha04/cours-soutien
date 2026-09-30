@@ -23,6 +23,12 @@ public class GlobalExceptionHandler {
         return reponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    // Donnée incorrecte détectée dans un service -> 400
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErreurResponse> donneeInvalide(IllegalArgumentException ex) {
+        return reponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     // Violation d'une contrainte de la base (unique, clé étrangère...)
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErreurResponse> integrite(DataIntegrityViolationException ex) {
