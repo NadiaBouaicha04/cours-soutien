@@ -13,6 +13,11 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(IdentifiantsInvalidesException.class)
+    public ResponseEntity<ErreurResponse> identifiants(IdentifiantsInvalidesException ex) {
+        return reponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
     @ExceptionHandler(RessourceIntrouvableException.class)
     public ResponseEntity<ErreurResponse> introuvable(RessourceIntrouvableException ex) {
         return reponse(HttpStatus.NOT_FOUND, ex.getMessage());
