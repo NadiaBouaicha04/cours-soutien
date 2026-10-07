@@ -33,6 +33,8 @@ dependencies {
 	testCompileOnly("org.projectlombok:lombok")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testAnnotationProcessor("org.projectlombok:lombok")
+  implementation("org.springframework.security:spring-security-oauth2-resource-server")
+  implementation("org.springframework.security:spring-security-oauth2-jose")
 }
 
 tasks.withType<Test> {

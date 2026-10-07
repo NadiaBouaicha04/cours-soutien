@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 // Espace gestionnaire
-// TEMPORAIRE : ouvert à tous. À l'étape JWT, réservé au rôle GESTIONNAIRE.
+// Réservé au rôle GESTIONNAIRE (voir SecurityConfig)
 @RestController
 @RequestMapping("/api/gestion")
 @RequiredArgsConstructor
