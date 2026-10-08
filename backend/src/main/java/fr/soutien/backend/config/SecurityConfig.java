@@ -16,10 +16,14 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -28,9 +32,15 @@ public class SecurityConfig {
     @Value("${app.jwt.secret}")
     private String secret;
 
+    // Adresse du front-end autorisée à appeler l'API (CORS)
+    @Value("${app.cors.origine:http://localhost:3000}")
+    private String origineFront;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            // Autoriser les appels venant du front-end (voir corsConfigurationSource)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // API sans cookie de session : la protection CSRF est inutile
             .csrf(csrf -> csrf.disable())
             // Aucune session côté serveur : chaque requête porte son token
@@ -77,6 +87,20 @@ public class SecurityConfig {
         return NimbusJwtDecoder.withSecretKey(cleSecrete())
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
+    }
+
+    // CORS : le navigateur n'autorise une page de http://localhost:3000 à appeler
+    // l'API de http://localhost:8080 que si l'API le permet explicitement
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(origineFront));                         // qui
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // quels verbes
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));        // quels en-têtes
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", config);
+        return source;
     }
 
     // Hachage des mots de passe (BCrypt)
