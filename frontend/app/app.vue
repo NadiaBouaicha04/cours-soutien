@@ -1,6 +1,6 @@
+<!-- Composant racine : affiche le layout, et dedans la page de l'URL courante -->
 <template>
-  <div>
-    <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
