@@ -5,7 +5,8 @@
 - Échanges en **JSON**, authentification par **token JWT** (en-tête `Authorization: Bearer <token>`).
 - Les URL désignent des **ressources** (noms), le **verbe HTTP** indique l'action.
 - On n'expose jamais les entités : on échange des **DTO** (pas de mot de passe dans les réponses).
-- Les URL parent ne contiennent jamais l'id du parent : il est déduit du token.
+- Les URL parent ne contiennent jamais l'id du parent : il est lu dans le token (champ `sub`).
+- `cours` d'un enfant est une **liste** (relation ManyToMany) ; la règle « un seul cours par enfant » est appliquée par le service.
 
 | Verbe    | Action               |
 |----------|----------------------|
@@ -61,7 +62,7 @@ Format uniforme des erreurs :
 | `DELETE` | `/api/parent/enfants/{id}`            | supprimer un enfant                      |
 | `GET`    | `/api/parent/cours-disponibles?niveauId={id}` | cours non complets d'un niveau   |
 | `PUT`    | `/api/parent/enfants/{id}/cours`      | inscrire / changer de cours              |
-| `DELETE` | `/api/parent/enfants/{id}/cours`      | désinscrire                              |
+| `DELETE` | `/api/parent/enfants/{id}/cours/{coursId}` | désinscrire d'un cours             |
 | `PUT`    | `/api/parent/paiement`                | mode et nombre de versements             |
 | `GET`    | `/api/parent/solde`                   | solde + liste des mouvements             |
 | `GET`    | `/api/parent/niveaux`                 | liste des niveaux                        |
@@ -113,7 +114,7 @@ Format uniforme des erreurs :
   "dateNaissance": "2012-04-15",
   "etablissement": "Collège Montaigne",
   "niveau": "3e",
-  "cours": null
+  "cours": []
 }
 ```
 
