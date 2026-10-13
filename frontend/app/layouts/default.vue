@@ -14,6 +14,11 @@ const { utilisateur, logout } = useAuth()
       </nav>
       <nav v-else-if="utilisateur?.role === 'GESTIONNAIRE'" class="menu">
         <NuxtLink to="/gestion">Accueil</NuxtLink>
+        <NuxtLink to="/gestion/utilisateurs">Utilisateurs</NuxtLink>
+        <NuxtLink to="/gestion/cours">Cours</NuxtLink>
+        <NuxtLink to="/gestion/salles">Salles</NuxtLink>
+        <NuxtLink to="/gestion/niveaux">Niveaux</NuxtLink>
+        <NuxtLink to="/gestion/recap">Récap</NuxtLink>
       </nav>
 
       <div class="compte">
@@ -23,7 +28,6 @@ const { utilisateur, logout } = useAuth()
     </header>
 
     <main class="contenu">
-      <!-- La page courante s'affiche ici -->
       <slot />
     </main>
   </div>
